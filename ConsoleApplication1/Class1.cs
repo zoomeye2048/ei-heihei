@@ -9,6 +9,7 @@ namespace ConsoleApplication1
     {
         public static string adf()
         {
+            string a = "d";
         return "";
 
         }
