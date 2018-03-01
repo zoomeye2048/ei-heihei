@@ -10,6 +10,7 @@ namespace ConsoleApplication1
         public static string adf()
         {
         return "";
+
         }
     }
 }
