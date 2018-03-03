@@ -1,4 +1,163 @@
 
+using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Linq;
+/*
+思路：不去做复杂、多层的假设与推理，根据每道题中最基本的条件：“四个命题只有一个为真”，对所有的组合答案进行筛选，经过10道题的筛选，剩下的就是所要求解答案。
+*/
+namespace ConsoleApplication1
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            //计时器
+            Stopwatch wc = new Stopwatch();
+            wc.Start();
+
+            string[] options = { "A", "B", "C", "D" };
+
+            List<string> list = new List<string>();
+            //【1】先列出10道题答案的所有可能的集合，一共有4^10条
+            string[] record = new string[10];
+
+            //使用递归执行多个嵌套的for循环生成集合
+            //还可以用Linq的写法更简单，见页尾
+            for (int i = 0; i < options.Length; i++)
+            {
+                record[0] = options[i];
+                M1(options, record, 0 + 1, list);
+            }
+            Console.WriteLine($"集合总数：{list.Count}");
+
+            //【2】遍历集合，按照每题给出的条件进行筛选
+            List<string> listStr = new List<string>();
+            foreach (var str in list)
+            {
+                if (!T2(str))
+                    continue;
+                if (!T3(str))
+                    continue;
+                if (!T4(str))
+                    continue;
+                if (!T5(str))
+                    continue;
+                if (!T6(str))
+                    continue;
+                if (!T7(str))
+                    continue;
+                if (!T8(str))
+                    continue;
+                if (!T9(str))
+                    continue;
+                if (!T10(str))
+                    continue;
+                listStr.Add(str);
+            }
+
+            //输出结果
+            Console.WriteLine($"剩余数量：{listStr.Count}");
+            if (listStr.Count == 1)
+                Console.WriteLine($"最终答案：{listStr.First()}");
+            Console.WriteLine($"运行时间：{wc.Elapsed}");
+            Console.ReadKey();
+        }
+
+        //递归方法用于实现嵌套for循环，record:把string[]当char[]用了
+        static void M1(string[] options, string[] record, int num, List<string> list)
+        {
+            for (int j = 0; j < options.Length; j++)
+            {
+                record[num] = options[j];
+                if (num == record.Length - 1)
+                {
+                    string[] tmp = new string[record.Length];
+                    record.CopyTo(tmp, 0);
+                    list.Add(string.Join("",tmp));
+                }
+                else
+                {
+                    M1(options, record, num + 1, list);
+                }
+            }
+        }
+
+        //题2 2=A且5=C，2=B且5=D，2=C且5=A，2=C且5=B中，仅存一个为真
+        static bool T2(string str)
+        {
+            bool[] bools = new bool[4];
+            bools[0] = str[1] == 'A' && str[4] == 'C';
+            bools[1] = str[1] == 'B' && str[4] == 'D';
+            bools[2] = str[1] == 'C' && str[4] == 'A';
+            bools[3] = str[1] == 'D' && str[4] == 'B';
+            if (1 == TrueCount(bools))
+                return true;
+            else
+                return false;
+        }
+
+        //题3 2，3，4，6四题中有三个答案相同，模式为 xxAx或BBBx或CxCC或DDxD
+        static bool T3(string str)
+        {
+            bool[] bools = new bool[4];
+            bools[0] = str[3] == 'A'&&str[1]==str[2]&&str[1]==str[5];
+            bools[1] = str[1] == str[2]&& str[1] == str[3]&&str[1]=='B'&&str[5]!='B';
+            bools[2] = str[1] == str[3]&& str[1] == str[5]&&str[1]=='C'&&str[2]!='C';
+            bools[3] = str[1] == str[2]&& str[1] == str[5]&&str[1]=='D'&&str[3]!='D';
+            if (bools[0] || bools[1] || bools[2] || bools[3])
+                return true;
+            else
+                return false;
+        }
+
+        //题4 4=A且1=5，4=B且2=7，4=C且1=9，4=D且6=10，仅存一个为真
+        static bool T4(string str)
+        {
+            bool[] bools = new bool[4];
+            bools[0] = str[0] == str[4] && str[3] == 'A';
+            bools[1] = str[1] == str[6] && str[3] == 'B';
+            bools[2] = str[0] == str[8] && str[3] == 'C';
+            bools[3] = str[5] == str[9] && str[3] == 'D';
+            if (1 == TrueCount(bools))
+                return true;
+            else
+                return false;
+        }
+
+        //题5 5=A=8,5=B=4,5=C=9,5=D=7,仅存一个为真
+        static bool T5(string str)
+        {
+            bool[] bools = new bool[4];
+            bools[0] = str[4] == str[7]&&str[4]=='A';
+            bools[1] = str[4] == str[3]&&str[4]=='B';
+            bools[2] = str[4] == str[8]&&str[4]=='C';
+            bools[3] = str[4] == str[6]&&str[4]=='D';
+            if (1 == TrueCount(bools))
+                return true;
+            else
+                return false;
+        }
+
+        //题6 8=A=2=4，8=B=1=6,8=C=3=10,8=D=5=9,仅存一个为真
+        static bool T6(string str)
+        {
+            bool[] bools = new bool[4];
+            bools[0] = str[7] == str[1] && str[7] == str[3] && str[5] == 'A';
+            bools[1] = str[7] == str[0] && str[7] == str[5] && str[5] == 'B';
+            bools[2] = str[7] == str[2] && str[7] == str[9] && str[5] == 'C';
+            bools[3] = str[7] == str[4] && str[7] == str[8] && str[5] == 'D';
+            if (1 == TrueCount(bools))
+                return true;
+            else
+                return false;
+        }
+
+        //题7 7=A且C为最少选项，7=B且B为最少选项，7=C且A为最少选项，7=D且D为最少选项
+        static bool T7(string str)
+        {
+            bool[] bools = new bool[4];
+            bools[0] = str[6] == 'A'&&MinOptCount(str)[0]=='C';
             bools[1] = str[6] == 'B' && MinOptCount(str)[0] == 'B';
             bools[2] = str[6] == 'C' && MinOptCount(str)[0] == 'A';
             bools[3] = str[6] == 'D' && MinOptCount(str)[0] == 'D';
@@ -12,7 +171,7 @@
         static bool T8(string str)
         {
             bool[] bools = new bool[4];
-            bools[0] = Math.Abs(str[6] - str[0]) != 1;
+            bools[0] = Math.Abs(str[6] - str[0])!=1;
             bools[1] = Math.Abs(str[4] - str[0]) != 1;
             bools[2] = Math.Abs(str[1] - str[0]) != 1;
             bools[3] = Math.Abs(str[9] - str[0]) != 1;
@@ -31,13 +190,13 @@
             bools[1] = str[4] != str[9] && str[8] == 'B';
             bools[2] = str[4] != str[1] && str[8] == 'C';
             bools[3] = str[4] != str[8] && str[8] == 'D';
-            bool _1_6_true = TrueCount(bools) == 1;
+            bool _1_6_true = TrueCount(bools)==1;
 
             bools[0] = str[4] == str[5] && str[8] == 'A';
             bools[1] = str[4] == str[9] && str[8] == 'B';
             bools[2] = str[4] == str[1] && str[8] == 'C';
             bools[3] = str[4] == str[8] && str[8] == 'D';
-            bool _1_6_false = TrueCount(bools) == 1;
+            bool _1_6_false = TrueCount(bools)==1;
 
             if ((str[0] == str[6] && _1_6_true) || (str[0] != str[6] && _1_6_false))
                 return true;
@@ -48,7 +207,7 @@
         //题10 最多选项次数-最少选项次数等于1
         static bool T10(string str)
         {
-            bool a = MaxCount(str) - MinOptCount(str)[1] >= 1;
+            bool a= MaxCount(str)-MinOptCount(str)[1]>=1;
             bool b = MaxCount(str) - MinOptCount(str)[1] <= 4;
             if (a && b)
                 return true;
@@ -78,17 +237,17 @@
             dic.Add('D', 0);
             for (int i = 0; i < str.Length; i++)
                 dic[str[i]]++;
-            int min = Math.Min(Math.Min(dic['A'], dic['B']), Math.Min(dic['C'], dic['D']));
+            int min=Math.Min(Math.Min(dic['A'], dic['B']), Math.Min(dic['C'], dic['D']));
             foreach (var key in dic.Keys)
             {
                 if (dic[key] == min)
                 {
-                    int[] arr = { key, min }; ;
+                    int[] arr = { key,min}; ;
                     return arr;
                 }
             }
-            return new int[] { 999, 999 };
-
+            return new int[]{ 999,999 };
+            
         }
 
         //返回最大数量
